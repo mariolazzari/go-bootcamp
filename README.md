@@ -329,8 +329,532 @@ func main() {
 }
 ```
 
-### Exercise 
+### Exercise: sum
 
 ```go
+package main
 
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	// read from standard input
+	reader := bufio.NewReader(os.Stdin)
+
+	// read first number
+	fmt.Println("Enter first number:")
+	num1, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// trim spaces and convert to int
+	num1 = strings.TrimSpace(num1)
+	iNum1, err := strconv.Atoi(num1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// repeat for second number
+	fmt.Println("Enter second number:")
+	num2, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	num2 = strings.TrimSpace(num2)
+	iNum2, err := strconv.Atoi(num2)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sum := iNum1 + iNum2
+	fmt.Printf("Sum: %d\n", sum)
+
+}
+```
+
+### Looping
+
+```go
+package main
+
+import "fmt"
+
+var pl = fmt.Println
+
+func main() {
+	// ----- FOR LOOPS -----
+	// for initialization; condition; postStatement {BODY}
+	// Print numbers 1 through 5
+	for x := 1; x <= 5; x++ {
+		pl(x)
+	}
+	// Do the opposite
+	for x := 5; x >= 1; x-- {
+		pl(x)
+	}
+
+	// x is out of the scope of the for loop so it doesn't exist
+	// pl("x :", x)
+
+	// For is used to create while loops as well
+	fX := 0
+	for fX < 5 {
+		pl(fX)
+		fX++
+	}
+
+	// Cycle through an array with range
+	// More on arrays later
+	// We don't need the index so we ignore it
+	// with the blank identifier _
+	aNums := []int{1, 2, 3}
+	for _, num := range aNums {
+		pl(num)
+	}
+
+	// We can allow a condition in the for loop
+	// to decide when to exit
+	xVal := 1
+	for true {
+		if xVal == 5 {
+			// Break exits the loop
+			break
+		}
+		pl(xVal)
+		xVal++
+	}
+}
+```
+
+### Exercise: guess a number
+
+```go
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	fmt.Println("Guess a number between 1 and 50:")
+
+	// guess a number between 0 and 50
+	numToGuess := rand.Intn(50)
+	fmt.Println("Random number is:", numToGuess)
+
+	// read number
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		num, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// cast number
+		num = strings.TrimSpace(num)
+		iNum, err := strconv.Atoi(num)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if iNum == numToGuess {
+			fmt.Println("You guessed!")
+			break
+		} else if iNum < numToGuess {
+			fmt.Println("Higher")
+		} else {
+			fmt.Println("Lower")
+		}
+	}
+
+}
+```
+
+### Strings
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"unicode/utf8"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- STRINGS -----
+	// Strings are arrays of bytes []byte
+	// Escape Sequences : \n \t \" \\
+	sV1 := "A word"
+
+	// Replacer that can be used on multiple strings
+	// to replace one string with another
+	replacer := strings.NewReplacer("A", "Another")
+	sV2 := replacer.Replace(sV1)
+	pl(sV2)
+
+	// Get length
+	pl("Length : ", len(sV2))
+
+	// Contains string
+	pl("Contains Another :", strings.Contains(sV2, "Another"))
+
+	// Get first index match
+	pl("o index :", strings.Index(sV2, "o"))
+
+	// Replace all matches with 0
+	// If -1 was 2 it would replace the 1st 2 matches
+	pl("Replace :", strings.Replace(sV2, "o", "0", -1))
+
+	// Remove whitespace characters from beginning and end of string
+	sV3 := "\nSome words\n"
+	sV3 = strings.TrimSpace(sV3)
+
+	// Split at delimiter
+	pl("Split :", strings.Split("a-b-c-d", "-"))
+
+	// Upper and lowercase string
+	pl("Lower :", strings.ToLower(sV2))
+	pl("Upper :", strings.ToUpper(sV2))
+
+	// Prefix or suffix
+	pl("Prefix :", strings.HasPrefix("tacocat", "taco"))
+	pl("Suffix :", strings.HasSuffix("tacocat", "cat"))
+
+	// ----- RUNES -----
+	// In Go characters are called Runes
+	// Runes are unicodes that represent characters
+	rStr := "abcdefg"
+
+	// Runes in string
+	pl("Rune Count :", utf8.RuneCountInString(rStr))
+
+	// Print runes in string
+	for i, runeVal := range rStr {
+		// Get index, Rune unicode and character
+		fmt.Printf("%d : %#U : %c\n", i, runeVal, runeVal)
+	}
+}
+```
+
+### Dates and times
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+var pl = fmt.Println
+
+func main() {
+
+	// ----- TIME -----
+	// Get day, month, year and time data
+	// Get current time
+	now := time.Now()
+	pl(now.Year(), now.Month(), now.Day())
+	pl(now.Hour(), now.Minute(), now.Second())
+
+	// Set a location to get time
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Time in New York %s\n", now.In(loc))
+
+	// Change location to Shanghai
+	loc, _ = time.LoadLocation("Asia/Shanghai")
+	fmt.Printf("Time in Shanghai %s\n", now.In(loc))
+
+	// Get times using different time standards
+	locEST, _ := time.LoadLocation("EST")
+	locUTC, _ := time.LoadLocation("UTC")
+	locMST, _ := time.LoadLocation("MST")
+	fmt.Printf("EST : %s\n", now.In(locEST))
+	fmt.Printf("UTC : %s\n", now.In(locUTC))
+	fmt.Printf("MST : %s\n", now.In(locMST))
+
+	// Calculate time since birthdate
+	// Year, month, day, hour, minute, second
+	// nanosecond and time zone
+	birthDate := time.Date(1974, time.December,
+		21, 11, 30, 10, 0, time.Local)
+
+	// Get difference between past date and now
+	diff := now.Sub(birthDate)
+
+	// Difference in days
+	fmt.Printf("Days Alive: %d days\n",
+		int(diff.Hours()/24))
+
+	// Hours
+	fmt.Printf("Hours Alive: %d hours\n",
+		int(diff.Hours()))
+}
+```
+
+### Arrays
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- ARRAYS -----
+	// Collection of values with the same data type
+	// and the size can't be changed
+	// Default values are 0, 0.0, false or ""
+
+	// Declare integer array with 5 elements
+	var arr1 [5]int
+
+	// Assign value to index
+	arr1[0] = 1
+
+	// Declare and initialize
+	arr2 := [5]int{1, 2, 3, 4, 5}
+
+	// Get by index
+	pl("Index 0 :", arr2[0])
+
+	// Length
+	pl("Arr Length :", len(arr2))
+
+	// Iterate with index
+	for i := range len(arr2) {
+		pl(arr2[i])
+	}
+
+	// Iterate with range
+	for i, v := range arr2 {
+		fmt.Printf("%d : %d\n", i, v)
+	}
+
+	// Multidimensional Array
+	arr3 := [2][2]int{
+		{1, 2},
+		{3, 4},
+	}
+
+	// Print multidimensional array
+	for i := range 2 {
+		for j := range 2 {
+			pl(arr3[i][j])
+		}
+	}
+
+	// String into slice of runes
+	aStr1 := "abcde"
+	rArr := []rune(aStr1)
+	for _, v := range rArr {
+		fmt.Printf("Rune Array : %d\n", v)
+	}
+
+	// Byte array to string
+	byteArr := []byte{'a', 'b', 'c'}
+	bStr := string(byteArr[:])
+	pl("I'm a string :", bStr)
+}
+```
+
+### Slices
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- SLICES -----
+	// Slices are like arrays but they can grow
+	// var name []dataType
+	// Create a slice with make
+	sl1 := make([]string, 6)
+
+	// Assign values by index
+	sl1[0] = "Society"
+	sl1[1] = "of"
+	sl1[2] = "the"
+	sl1[3] = "Simulated"
+	sl1[4] = "Universe"
+
+	// Size of slice
+	pl("Slice Size :", len(sl1))
+
+	// Cycle with for
+	for i := range sl1 {
+		pl(sl1[i])
+	}
+
+	// Cycle with range
+	for _, x := range sl1 {
+		pl(x)
+	}
+
+	// Create a slice literal
+	sl2 := []int{12, 21, 1974}
+	pl(sl2)
+
+	// A slice points at an array and you can create a slice
+	// of an array (A slice is a view of an underlying array)
+	// You can have multiple slices point to the same array
+	sArr := [5]int{1, 2, 3, 4, 5}
+	// Start at 0 index up to but not including the 2nd index
+	sl3 := sArr[0:2]
+	pl(sl3)
+
+	// Get slice from beginning
+	pl("1st 3 :", sArr[:3])
+
+	// Get slice to the end
+	pl("Last 3 :", sArr[2:])
+
+	// If you change the array the slice also changes
+	sArr[0] = 10
+	pl("sl3 :", sl3)
+
+	// Changing the slice also changes the array
+	sl3[0] = 1
+	pl("sArr :", sArr)
+
+	// Append a value to a slice (Also overwrites array)
+	sl3 = append(sl3, 12)
+	pl("sl3 :", sl3)
+	pl("sArr :", sArr)
+
+	// Printing empty slices will return nils which show
+	// as empty slices
+	sl4 := make([]string, 6)
+	pl("sl4 :", sl4)
+	pl("sl4[0] :", sl4[0])
+}
+```
+
+### Functions
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- FUNCTIONS -----
+func sayHello() {
+	pl("Hello")
+}
+
+// Returns sum of values
+func getSum(x int, y int) int {
+	return x + y
+}
+
+// Return multiple values
+func getTwo(x int) (int, int) {
+	return x + 1, x + 2
+}
+
+// Return potential error
+func getQuotient(x float64, y float64) (ans float64, err error) {
+	if y == 0 {
+		// Define error message returned with dummy value
+		// for ans
+		return 0, fmt.Errorf("You can't divide by zero")
+	} else {
+		// If no error return nil
+		return x / y, nil
+	}
+}
+
+// Variadic function
+func getSum2(nums ...int) int {
+	sum := 0
+	// nums gets converted into a slice which is
+	// iterated by range (More on slices later)
+	for _, num := range nums {
+		sum += num
+	}
+	return sum
+}
+
+func getArraySum(arr []int) int {
+	sum := 0
+	for _, val := range arr {
+		sum += val
+	}
+	return sum
+}
+
+func changeVal(f3 int) int {
+	f3 += 1
+	return f3
+}
+
+func main() {
+	// ----- FUNCTIONS -----
+	// func funcName(parameters) returnType {BODY}
+	// If you only need a function in the current package
+	// start with lowercase letter
+	// Letters and numbers in camelcase
+	sayHello()
+	pl(getSum(5, 4))
+	f1, f2 := getTwo(5)
+	fmt.Printf("%d %d\n", f1, f2)
+
+	// Function that can return an error
+	ans, err := getQuotient(5, 0)
+	if err == nil {
+		pl("5/4 =", ans)
+	} else {
+		pl(err)
+		// End program
+		// log.Fatal(err)
+	}
+
+	// Function receives unknown number of parameters
+	// Variadic Function
+	pl("Unknown Sum :", getSum2(1, 2, 3, 4))
+
+	// Pass an array to a function by value
+	vArr := []int{1, 2, 3, 4}
+	pl("Array Sum :", getArraySum(vArr))
+
+	// Go passes the value to functions so it isn't changed
+	// even if the same variable name is used
+	f3 := 5
+	pl("f3 before func :", f3)
+	changeVal(f3)
+	pl("f3 after func :", f3)
+}
 ```
