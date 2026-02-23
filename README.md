@@ -328,3 +328,114 @@ func main() {
 	// Htpot
 }
 ```
+
+### Exercise: sum
+
+```go
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	// read from standard input
+	reader := bufio.NewReader(os.Stdin)
+
+	// read first number
+	fmt.Println("Enter first number:")
+	num1, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// trim spaces and convert to int
+	num1 = strings.TrimSpace(num1)
+	iNum1, err := strconv.Atoi(num1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// repeat for second number
+	fmt.Println("Enter second number:")
+	num2, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	num2 = strings.TrimSpace(num2)
+	iNum2, err := strconv.Atoi(num2)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sum := iNum1 + iNum2
+	fmt.Printf("Sum: %d\n", sum)
+
+}
+```
+
+### Looping
+
+```go
+package main
+
+import "fmt"
+
+var pl = fmt.Println
+
+func main() {
+	// ----- FOR LOOPS -----
+	// for initialization; condition; postStatement {BODY}
+	// Print numbers 1 through 5
+	for x := 1; x <= 5; x++ {
+		pl(x)
+	}
+	// Do the opposite
+	for x := 5; x >= 1; x-- {
+		pl(x)
+	}
+
+	// x is out of the scope of the for loop so it doesn't exist
+	// pl("x :", x)
+
+	// For is used to create while loops as well
+	fX := 0
+	for fX < 5 {
+		pl(fX)
+		fX++
+	}
+
+	// Cycle through an array with range
+	// More on arrays later
+	// We don't need the index so we ignore it
+	// with the blank identifier _
+	aNums := []int{1, 2, 3}
+	for _, num := range aNums {
+		pl(num)
+	}
+
+	// We can allow a condition in the for loop
+	// to decide when to exit
+	xVal := 1
+	for true {
+		if xVal == 5 {
+			// Break exits the loop
+			break
+		}
+		pl(xVal)
+		xVal++
+	}
+}
+```
+
+### Exercise: loop
+
+```go
+
+```
