@@ -434,8 +434,181 @@ func main() {
 }
 ```
 
-### Exercise: loop
+### Exercise: guess a number
 
 ```go
+package main
 
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	fmt.Println("Guess a number between 1 and 50:")
+
+	// guess a number between 0 and 50
+	numToGuess := rand.Intn(50)
+	fmt.Println("Random number is:", numToGuess)
+
+	// read number
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		num, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// cast number
+		num = strings.TrimSpace(num)
+		iNum, err := strconv.Atoi(num)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if iNum == numToGuess {
+			fmt.Println("You guessed!")
+			break
+		} else if iNum < numToGuess {
+			fmt.Println("Higher")
+		} else {
+			fmt.Println("Lower")
+		}
+	}
+
+}
+```
+
+### Strings
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"unicode/utf8"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- STRINGS -----
+	// Strings are arrays of bytes []byte
+	// Escape Sequences : \n \t \" \\
+	sV1 := "A word"
+
+	// Replacer that can be used on multiple strings
+	// to replace one string with another
+	replacer := strings.NewReplacer("A", "Another")
+	sV2 := replacer.Replace(sV1)
+	pl(sV2)
+
+	// Get length
+	pl("Length : ", len(sV2))
+
+	// Contains string
+	pl("Contains Another :", strings.Contains(sV2, "Another"))
+
+	// Get first index match
+	pl("o index :", strings.Index(sV2, "o"))
+
+	// Replace all matches with 0
+	// If -1 was 2 it would replace the 1st 2 matches
+	pl("Replace :", strings.Replace(sV2, "o", "0", -1))
+
+	// Remove whitespace characters from beginning and end of string
+	sV3 := "\nSome words\n"
+	sV3 = strings.TrimSpace(sV3)
+
+	// Split at delimiter
+	pl("Split :", strings.Split("a-b-c-d", "-"))
+
+	// Upper and lowercase string
+	pl("Lower :", strings.ToLower(sV2))
+	pl("Upper :", strings.ToUpper(sV2))
+
+	// Prefix or suffix
+	pl("Prefix :", strings.HasPrefix("tacocat", "taco"))
+	pl("Suffix :", strings.HasSuffix("tacocat", "cat"))
+
+	// ----- RUNES -----
+	// In Go characters are called Runes
+	// Runes are unicodes that represent characters
+	rStr := "abcdefg"
+
+	// Runes in string
+	pl("Rune Count :", utf8.RuneCountInString(rStr))
+
+	// Print runes in string
+	for i, runeVal := range rStr {
+		// Get index, Rune unicode and character
+		fmt.Printf("%d : %#U : %c\n", i, runeVal, runeVal)
+	}
+}
+```
+
+### Dates and times
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+var pl = fmt.Println
+
+func main() {
+
+	// ----- TIME -----
+	// Get day, month, year and time data
+	// Get current time
+	now := time.Now()
+	pl(now.Year(), now.Month(), now.Day())
+	pl(now.Hour(), now.Minute(), now.Second())
+
+	// Set a location to get time
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Time in New York %s\n", now.In(loc))
+
+	// Change location to Shanghai
+	loc, _ = time.LoadLocation("Asia/Shanghai")
+	fmt.Printf("Time in Shanghai %s\n", now.In(loc))
+
+	// Get times using different time standards
+	locEST, _ := time.LoadLocation("EST")
+	locUTC, _ := time.LoadLocation("UTC")
+	locMST, _ := time.LoadLocation("MST")
+	fmt.Printf("EST : %s\n", now.In(locEST))
+	fmt.Printf("UTC : %s\n", now.In(locUTC))
+	fmt.Printf("MST : %s\n", now.In(locMST))
+
+	// Calculate time since birthdate
+	// Year, month, day, hour, minute, second
+	// nanosecond and time zone
+	birthDate := time.Date(1974, time.December,
+		21, 11, 30, 10, 0, time.Local)
+
+	// Get difference between past date and now
+	diff := now.Sub(birthDate)
+
+	// Difference in days
+	fmt.Printf("Days Alive: %d days\n",
+		int(diff.Hours()/24))
+
+	// Hours
+	fmt.Printf("Hours Alive: %d hours\n",
+		int(diff.Hours()))
+}
 ```
