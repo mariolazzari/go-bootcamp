@@ -1315,3 +1315,170 @@ func main() {
 	fmt.Println("Max Value :", max)
 }
 ```
+
+### Packages
+
+```go
+package main
+
+import (
+	"fmt"
+	_ stuff "example/project/mypackage"
+)
+
+var pl = fmt.Println
+
+func main() {
+	fmt.Println("Hello", stuff.Name)
+	intArr := []int{2,3,5,7,11}
+	strArr := stuff.IntArrToStrArr(intArr)
+	fmt.Println(strArr)
+	fmt.Println(reflect.Typeof(strArr))
+}
+```
+
+### Maps
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- MAPS -----
+	// Maps are collections of key/value pairs
+	// Keys can be any data type that can be compared
+	// using == (They can be a different type than
+	// the value)
+	// var myMap map [keyType]valueType
+
+	// Declare a map variable
+	var heroes map[string]string
+	// Create the map
+	heroes = make(map[string]string)
+
+	// You can do it in one step
+	villians := make(map[string]string)
+
+	// Add keys and values
+	heroes["Batman"] = "Bruce Wayne"
+	heroes["Superman"] = "Clark Kent"
+	heroes["The Flash"] = "Barry Allen"
+	villians["Lex Luther"] = "Lex Luther"
+
+	// Define with map literal
+	superPets := map[int]string{1: "Krypto",
+		2: "Bat Hound"}
+
+	// Get value with key (Use %v with Printf)
+	fmt.Printf("Batman is %v\n", heroes["Batman"])
+
+	// If you access a key that doesn't exist
+	// you get nil
+	pl("Chip :", superPets[3])
+
+	// You can check if there is a value or nil
+	_, ok := superPets[3]
+	pl("Is there a 3rd pet :", ok)
+
+	// Cycle through map
+	for k, v := range heroes {
+		fmt.Printf("%s is %s\n", k, v)
+	}
+
+	// Delete a key value
+	delete(heroes, "The Flash")
+}
+```
+
+### Generics
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- FUNCTION THAT EXCEPTS GENERICS -----
+// This generic type parameter is capital, between
+// square brackets and has a rule for what data
+// it will except called a constraint
+// any : anything
+// comparable : Anything that supports ==
+// More Constraints : pkg.go.dev/golang.org/x/exp/constraints
+
+// You can also define what is excepted like this
+// Define that my generic must be an int or float64
+type MyConstraint interface {
+	int | float64
+}
+
+func getSumGen[T MyConstraint](x T, y T) T {
+	return x + y
+}
+
+func main() {
+	// ----- GENERICS -----
+	// We can specify the data type to be used at a
+	// later time with generics
+	// It is mainly used when we want to create
+	// functions that can work with
+	// multiple data types
+	pl("5 + 4 =", getSumGen(5, 4))
+	pl("5.6 + 4.7 =", getSumGen(5.6, 4.7))
+
+	// This causes an error
+	// pl("5.6 + 4.7 =", getSumGen("5.6", "4.7"))
+}
+```
+
+### Structs
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- FUNCTION THAT EXCEPTS GENERICS -----
+// This generic type parameter is capital, between
+// square brackets and has a rule for what data
+// it will except called a constraint
+// any : anything
+// comparable : Anything that supports ==
+// More Constraints : pkg.go.dev/golang.org/x/exp/constraints
+
+// You can also define what is excepted like this
+// Define that my generic must be an int or float64
+type MyConstraint interface {
+	int | float64
+}
+
+func getSumGen[T MyConstraint](x T, y T) T {
+	return x + y
+}
+
+func main() {
+	// ----- GENERICS -----
+	// We can specify the data type to be used at a
+	// later time with generics
+	// It is mainly used when we want to create
+	// functions that can work with
+	// multiple data types
+	pl("5 + 4 =", getSumGen(5, 4))
+	pl("5.6 + 4.7 =", getSumGen(5.6, 4.7))
+
+	// This causes an error
+	// pl("5.6 + 4.7 =", getSumGen("5.6", "4.7"))
+}
+```
