@@ -1450,35 +1450,493 @@ import (
 
 var pl = fmt.Println
 
-// ----- FUNCTION THAT EXCEPTS GENERICS -----
-// This generic type parameter is capital, between
-// square brackets and has a rule for what data
-// it will except called a constraint
-// any : anything
-// comparable : Anything that supports ==
-// More Constraints : pkg.go.dev/golang.org/x/exp/constraints
-
-// You can also define what is excepted like this
-// Define that my generic must be an int or float64
-type MyConstraint interface {
-	int | float64
+// ----- STRUCTS -----
+type customer struct {
+	name    string
+	address string
+	bal     float64
 }
 
-func getSumGen[T MyConstraint](x T, y T) T {
+// This struct has a function associated
+type rectangle struct {
+	length, height float64
+}
+
+func (r rectangle) Area() float64 {
+	return r.length * r.height
+}
+
+// Customer passed as values
+func getCustInfo(c customer) {
+	fmt.Printf("%s owes us %.2f\n", c.name, c.bal)
+}
+
+func newCustAdd(c *customer, address string) {
+	c.address = address
+}
+
+// Struct composition : Putting a struct in another
+type contact struct {
+	fName string
+	lName string
+	phone string
+}
+
+type business struct {
+	name    string
+	address string
+	contact
+}
+
+func (b business) info() {
+	fmt.Printf("Contact at %s is %s %s\n", b.name, b.contact.fName, b.contact.lName)
+}
+
+func main() {
+	// ----- STRUCTS -----
+	// Structs allow you to store values with many
+	// data types
+
+	// Add values
+	var tS customer
+	tS.name = "Tom Smith"
+	tS.address = "5 Main St"
+	tS.bal = 234.56
+
+	// Pass to function as values
+	getCustInfo(tS)
+	// or as reference
+	newCustAdd(&tS, "123 South st")
+	pl("Address :", tS.address)
+
+	// Create a struct literal
+	sS := customer{"Sally Smith", "123 Main", 0.0}
+	pl("Name :", sS.name)
+
+	// Structs with functions
+	rect1 := rectangle{10.0, 15.0}
+	pl("Rect Area :", rect1.Area())
+
+	// Go doesn't support inheritance, but it does
+	// support composition by embedding a struct
+	// in another
+	con1 := contact{
+		"James",
+		"Wang",
+		"555-1212",
+	}
+
+	bus1 := business{
+		"ABC Plumbing",
+		"234 North St",
+		con1,
+	}
+
+	bus1.info()
+}
+```
+
+### Define types
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- DEFINED TYPES -----
+// I'll define different cooking measurement types
+// so we can do conversions
+type Tsp float64
+type TBs float64
+type ML float64
+
+// Convert with functions (Bad Way)
+func tspToML(tsp Tsp) ML {
+	return ML(tsp * 4.92)
+}
+
+func TBToML(tbs TBs) ML {
+	return ML(tbs * 14.79)
+}
+
+// Associate method with types
+func (tsp Tsp) ToMLs() ML {
+	return ML(tsp * 4.92)
+}
+func (tbs TBs) ToMLs() ML {
+	return ML(tbs * 14.79)
+}
+
+func main() {
+	// ----- DEFINED TYPES -----
+	// We used a defined type previously with structs
+	// You can use them also to enhance the quality
+	// of other data types
+	// We'll create them for different measurements
+
+	// Convert from tsp to mL
+	ml1 := ML(Tsp(3) * 4.92)
+	fmt.Printf("3 tsps = %.2f mL\n", ml1)
+
+	// Convert from TBs to mL
+	ml2 := ML(TBs(3) * 14.79)
+	fmt.Printf("3 TBs = %.2f mL\n", ml2)
+
+	// You can use arithmetic and comparison
+	// operators
+	pl("2 tsp + 4 tsp =", Tsp(2) + Tsp(4))
+	pl("2 tsp > 4 tsp =", Tsp(2) > Tsp(4))
+
+	// We can convert with functions
+	// Bad Way
+	fmt.Printf("3 tsp = %.2f mL\n", tspToML(3))
+	fmt.Printf("3 TBs = %.2f mL\n", TBToML(3))
+
+	// We can solve this by using methods which
+	// are functions associated with a type
+	tsp1 := Tsp(3)
+	fmt.Printf("%.2f tsp = %.2f mL\n", tsp1, tsp1.ToMLs())
+}
+```
+
+### Interfaces
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- INTERFACES -----
+type Animal interface {
+	AngrySound()
+	HappySound()
+}
+
+// Define type with interface methods and its
+// own method
+type Cat string
+
+func (c Cat) Attack() {
+	pl("Cat Attacks its Prey")
+}
+
+// Return the cats name with a type conversion
+func (c Cat) Name() string {
+	return string(c)
+}
+
+func (c Cat) AngrySound() {
+	pl("Cat says Hissssss")
+}
+func (c Cat) HappySound() {
+	pl("Cat says Purrr")
+}
+
+func main() {
+	// ----- INTERFACES -----
+	// Interfaces allow you to create contracts
+	// that say if anything inherits it that
+	// they will implement defined methods
+
+	// If we had animals and wanted to define that
+	// they all perform certain actions, but in their
+	// specific way we could use an interface
+
+	// With Go you don't have to say a type uses
+	// an interface. When your type implements
+	// the required methods it is automatic
+	var kitty Animal
+	kitty = Cat("Kitty")
+	kitty.AngrySound()
+
+	// We can only call methods defined in the
+	// interface for Cats because of the contract
+	// unless you convert Cat back into a concrete
+	// Cat type using a type assertion
+	var kitty2 Cat = kitty.(Cat)
+	kitty2.Attack()
+	pl("Cats Name :", kitty2.Name())
+}
+```
+
+### Concurrency
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var pl = fmt.Println
+
+// ----- CONCURRENCY -----
+func printTo15() {
+	for i := 1; i <= 15; i++ {
+		pl("Func 1 :", i)
+	}
+}
+func printTo10() {
+	for i := 1; i <= 10; i++ {
+		pl("Func 2 :", i)
+	}
+}
+
+// These functions will print in order using
+// channels
+// Func receives a channel and then sends values
+// over channels once each time it is called
+func nums1(channel chan int) {
+	channel <- 1
+	channel <- 2
+	channel <- 3
+}
+func nums2(channel chan int) {
+	channel <- 4
+	channel <- 5
+	channel <- 6
+}
+
+// ----- BANK ACCOUNT EXAMPLE -----
+// Here I'll simulate customers accessing a
+// bank account and lock out customers to
+// allow for individual access
+type Account struct {
+	balance int
+	lock    sync.Mutex // Mutual exclusion
+}
+
+func (a *Account) GetBalance() int {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	return a.balance
+}
+
+func (a *Account) Withdraw(v int) {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	if v > a.balance {
+		pl("Not enough money in account")
+	} else {
+		fmt.Printf("%d withdrawn : Balance : %d\n",
+			v, a.balance)
+		a.balance -= v
+	}
+}
+
+func main() {
+	// ----- CONCURRENCY -----
+	// Concurrency allows us to have multiple
+	// blocks of code share execution time by
+	// pausing their execution. We can also
+	// run blocks of codes in parallel at the same
+	// time. (Concurrent tasks in Go are called
+	// goroutines)
+
+	// To execute multiple functions in new
+	// goroutines add the word go in front of
+	// the function calls (Those functions can't
+	// have return values)
+
+	// We can't control when functions execute
+	// so we may get different results
+	go printTo15()
+	go printTo10()
+
+	// We have to pause the main function because
+	// if main ends so will the goroutines
+	time.Sleep(2 * time.Second) // Pause 2 seconds
+
+	// You can have goroutines communicate by
+	// using channels. The sending goroutine
+	// also makes sure the receiving goroutine
+	// receives the value before it attempts
+	// to use it
+
+	// Create a channel : Only carries values of
+	// 1 type
+	channel1 := make(chan int)
+	channel2 := make(chan int)
+	go nums1(channel1)
+	go nums2(channel2)
+	pl(<-channel1)
+	pl(<-channel1)
+	pl(<-channel1)
+	pl(<-channel2)
+	pl(<-channel2)
+	pl(<-channel2)
+
+	// Using locks to protect data from being
+	// accessed by more than one user at a time
+	// Locks are another option when you don't
+	// have to pass data
+	var acct Account
+	acct.balance = 100
+	pl("Balance :", acct.GetBalance())
+
+	for range 12 {
+		go acct.Withdraw(10)
+	}
+	time.Sleep(2 * time.Second)
+}
+```
+
+### Closures
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- CLOSURES -----
+// Pass a function to a function
+func useFunc(f func(int, int) int, x, y int) {
+	pl("Answer :", (f(x, y)))
+}
+
+func sumVals(x, y int) int {
 	return x + y
 }
 
 func main() {
-	// ----- GENERICS -----
-	// We can specify the data type to be used at a
-	// later time with generics
-	// It is mainly used when we want to create
-	// functions that can work with
-	// multiple data types
-	pl("5 + 4 =", getSumGen(5, 4))
-	pl("5.6 + 4.7 =", getSumGen(5.6, 4.7))
+	// ----- CLOSURES -----
+	// Closures are functions that don't have to be
+	// associated with an identifier (Anonymous)
 
-	// This causes an error
-	// pl("5.6 + 4.7 =", getSumGen("5.6", "4.7"))
+	// Create a closure that sums values
+	intSum := func(x, y int) int { return x + y }
+	pl("5 + 4 =", intSum(5, 4))
+
+	// Closures can change values outside the function
+	samp1 := 1
+	changeVar := func() { samp1 += 1 }
+	changeVar()
+	pl("samp1 =", samp1)
+
+	// Pass a function to a function
+	useFunc(sumVals, 5, 8)
+}
+```
+
+### Recursion
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var pl = fmt.Println
+
+// ----- RECURSION -----
+func factorial(num uint64) uint64 {
+	// This condition ends calling functions
+	if num == 0 {
+		return 1
+	}
+	return num * factorial(num-1)
+}
+
+func main() {
+	// ----- RECURSION -----
+	// Recursion occurs when a function calls itself
+	// There must be a condition that ends this
+	// Finding a factorial is commonly used
+	pl("Factorial 4 =", factorial(4))
+	// 1st : result = 4 * factorial(3) = 4 * 6 = 24
+	// 2nd : result = 3 * factorial(2) = 3 * 2 = 6
+	// 3rd : result = 2 * factorial(1) = 2 * 1 = 2
+}
+```
+
+### Regular expressions
+
+```go
+package main
+
+import (
+	"fmt"
+	"regexp"
+)
+
+var pl = fmt.Println
+
+func main() {
+	// ----- REGULAR EXPRESSIONS -----
+	// You can use regular expressions to test
+	// if a string matches a pattern
+
+	// Search for ape followed by not a space
+	reStr := "The ape was at the apex"
+	match, _ := regexp.MatchString("(ape[^ ]?)", reStr)
+	pl(match)
+
+	// You can compile them
+	// Find multiple words ending with at
+	reStr2 := "Cat rat mat fat pat"
+	r, _ := regexp.Compile("([crmfp]at)")
+
+	// Did you find any matches?
+	pl("MatchString :", r.MatchString(reStr2))
+
+	// Return first match
+	pl("FindString :", r.FindString(reStr2))
+
+	// Starting and ending index for 1st match
+	pl("Index :", r.FindStringIndex(reStr2))
+
+	// Return all matches
+	pl("All String :", r.FindAllString(reStr2, -1))
+
+	// Get 1st 2 matches
+	pl("All String :", r.FindAllString(reStr2, 2))
+
+	// Get indexes for all matches
+	pl("All Submatch Index :", r.FindAllStringSubmatchIndex(reStr2, -1))
+
+	// Replace all matches with Dog
+	pl(r.ReplaceAllString(reStr2, "Dog"))
+}
+```
+
+### Automated testing
+
+```go
+package main
+
+import (
+	"testing"
+)
+
+func TestIsEmail(t *testing.T) {
+	_, err := IsEmail("hello")
+	if err == nil {
+		t.Error("hello is not an email")
+	}
+
+	_, err = IsEmail("derek@aol.com")
+	if err != nil {
+		t.Error("derek@aol.com is an email")
+	}
+
+	_, err = IsEmail("derek@aol")
+	if err != nil {
+		t.Error("derek@aol is not email")
+	}
 }
 ```
