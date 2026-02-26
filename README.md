@@ -2659,3 +2659,9 @@ func main() {
 	log.Fatal(err)
 }
 ```
+
+## Complex web app
+
+```sh
+go mod init github.com/mariolazzari/go-bootcamp/webapp3
+```
